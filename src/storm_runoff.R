@@ -4,6 +4,15 @@
 # 
 # In the script, create a function called predict_runoff that estimates the storm runoff volume using inputs for the impervious fraction and watershed area (you can use a constant value of 1 for                                                                                                                                                here). In other words, your function should only require two arguments
 
+#' Projected stormwater volumes from runoff
+#'
+#' @param i_a A numeric vector of impervious proportions of the watershed.
+#' @param a A number indicating the area of the watershed
+#'
+#' @returns A vector of predicted stormater runoff volumes.
+#' @export 
+#'
+#' @examples
 predict_runoff <- function(i_a, a) {
   runoff_volume <- vector(mode = "numeric", length = length(i_a))
   for(i in seq_along(i_a)) {
