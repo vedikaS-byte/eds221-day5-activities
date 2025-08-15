@@ -1,0 +1,85 @@
+---
+title: "us_tilapia_imports"
+output: html_document
+---
+
+# Experimenting sourcing and function documentation with environmental data
+
+*Loaded packages are hidden, but the neccessary ones are: tidyverse, here, and janitor.*
+```{r}
+#| include: False
+  library(tidyverse)
+library(here)
+library(janitor)
+```
+
+
+Read in tilapia data. 
+```{r}
+us_tilapia_imports <- read.csv(here::here("data", "CopyOfus_tilapia_imports.csv"), check.names = F)
+
+head(us_tilapia_imports)
+str(us_tilapia_imports)
+
+```
+
+```{r}
+# some data wrangling
+us_tilapia_imports_1 <- us_tilapia_imports  %>% pivot_longer(cols = -country, names_to = "year", values_to = "count") 
+str(us_tilapia_imports_1)
+class(us_tilapia_imports_1$year)
+
+yearly_tilapia_tot <- us_tilapia_imports_1 %>% mutate(year = as.factor(year), count = as.numeric(count)) %>% 
+  group_by(year) %>% summarize(sum(count, na.rm = T)) %>% na.omit()
+
+yearly_tilapia_tot <- as.data.frame(yearly_tilapia_tot)
+class(yearly_tilapia_tot)
+
+colnames(yearly_tilapia_tot) <- c("year_fish", "total_fish")
+str(yearly_tilapia_tot)
+
+library(ggplot2)
+yearly_tilapia_tot %>% ggplot(aes(x = factor(year_fish), y = total_fish)) +  geom_point() + geom_line() + theme_bw() + 
+  labs(x = "Year", y = "Total Annual Imported Tilapia", title = "Total US Tilapia Imports (1992-2018)")
+
+ggsave(here::here("figs", "yearly_tilapia_tot.png"))
+
+# Check the class of the year column. What is it, and why do you think that’s the case? Then, coerce the year column to numeric (e.g. using mutate() and as.numeric() in combination)
+# 
+# Use dplyr::group_by() %>% summarize() to find the total US tilapia imports by year, store as yearly_tilapia_tot
+# 
+# Create a ggplot line graph of total US tilapia imports for all years in yearly_tilapia_tot. Update axis labels (include units as necessary), then export your graph as a .png to figs.
+
+
+
+```
+```{r}
+us_tilapia_imports_filter <- us_tilapia_imports %>% filter(country == "Ecuador" | country == "Honduras" | country == "Costa Rica" | country == "Mexico")
+
+str(us_tilapia_imports_filter)
+levels(factor(us_tilapia_imports_filter$country))
+
+# Create a ggplot graph of total US tilapia imports over time, for those four countries in the subset you created above, separated by country. Update axis labels, add a title, customize your color scheme, update the theme. Export a .jpg of your graph to figs.
+us_tilapia_imports_filter <- us_tilapia_imports_filter %>% pivot_longer(cols = -country, names_to = "year", values_to = "count") 
+str(us_tilapia_imports_filter)
+
+class(us_tilapia_imports_filter$year)
+
+yearly_tilapia_tot_filter <- us_tilapia_imports_filter %>% mutate(year = as.factor(year), count = as.numeric(count)) %>% 
+  group_by(country, year) %>% summarize(sum(count, na.rm = T)) %>% na.omit()
+
+yearly_tilapia_tot_filter <- as.data.frame(yearly_tilapia_tot_filter)
+class(yearly_tilapia_tot_filter)
+
+colnames(yearly_tilapia_tot_filter) <- c("country", "year_fish", "total_fish")
+str(yearly_tilapia_tot_filter)
+
+library(ggplot2)
+yearly_tilapia_tot_filter %>% ggplot(aes(x = factor(year_fish), y = total_fish, col = factor(country))) +  geom_point()  + theme_bw() + facet_wrap(~factor(country)) + guides(col = "none") + 
+  labs(x = "Year", y = "Total Annual Imported Tilapia", title = "Total US Tilapia Imports (1992-2018)")
+
+ggsave(here::here("figs", "yearly_tilapia_tot_countries.png"))
+
+```
+
+
